@@ -13,10 +13,17 @@ def delivery_report(err, msg):
     else:
         print(f"✅ PG Event: {msg.key().decode('utf-8')} sent to {msg.topic()}")
 
+# Global counter for deterministic IDs
+current_id = 10000
+
 def generate_pg_event():
-    txn_id = f"TXN_{random.randint(10000, 99999)}"
-    # Intentionally vary amounts slightly to test your engine later
+    global current_id
+    txn_id = f"TXN_{current_id}"
+    current_id += 1
+    
+    # Standardize amounts list for consistent matching
     amount = random.choice([499.00, 1200.50, 2500.00, 89.99])
+    
     return {
         "transaction_id": txn_id,
         "gateway": "Razorpay",
