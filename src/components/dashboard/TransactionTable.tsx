@@ -85,13 +85,13 @@ export function TransactionTable({ transactions, filter }: TransactionTableProps
                 )}
               >
                 {/* Date & Time */}
-                <td className="px-4 py-3 text-xs text-muted-foreground">
-                   {format(txn.timestamp, 'dd MMM yyyy, HH:mm:ss')}
+                <td className="px-4 py-3 font-medium">
+                   {format(txn.timestamp, 'MMM dd, HH:mm:ss')}
                 </td>
                 
                 {/* Transaction ID */}
-                <td className="px-4 py-3">
-                   <span className="font-mono text-xs text-foreground">{txn.upiRefId}</span>
+                <td className="px-4 py-3 font-mono text-xs">
+                    {txn.id}
                 </td>
 
                 {/* Method */}

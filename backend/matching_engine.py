@@ -9,7 +9,7 @@ app = FastAPI()
 # Kafka Config
 conf = {
     'bootstrap.servers': "localhost:9094",
-    'group.id': "recon-group-v2", # Changed group to reset offsets/ensure consumption
+    'group.id': "recon-group-force-reset-v1", # Changed group to force read from start
     'auto.offset.reset': 'earliest'
 }
 consumer = Consumer(conf)
@@ -54,6 +54,7 @@ async def reconcile_logic(websocket: WebSocket):
                 if time.time() - last_cleanup > 10:
                     await cleanup_buffers()
                     last_cleanup = time.time()
+                    print(f"💓 Heartbeat: Engine is running... (PG Buffer: {len(pg_buffer)}, OMS Buffer: {len(oms_buffer)})")
                 continue
             
             if msg.error():
@@ -82,23 +83,35 @@ async def reconcile_logic(websocket: WebSocket):
                     oms_entry = oms_buffer.pop(txn_id)['data']
 
                     # Matching Logic
+                    # Matching Logic
                     status = "MATCHED"
+                    
+                    # 1. Check Amount
                     if pg_entry['amount'] != oms_entry['amount']:
                         status = "AMOUNT_MISMATCH"
+                        
+                    # 2. Check Status (Critical: PG Success vs OMS Failure)
+                    # PG usually sends "CAPTURED". OMS might send "PAYMENT_FAILED"
+                    elif oms_entry.get('status') == 'PAYMENT_FAILED' and pg_entry.get('status') in ['CAPTURED', 'Success']:
+                        status = "STATUS_MISMATCH"
                     
                     result = {
                         "txn_id": txn_id,
                         "status": status,
                         "pg_amount": pg_entry['amount'],
                         "oms_amount": oms_entry['amount'],
-                        "details": "Verified" if status == "MATCHED" else "Alert: Difference detected!"
+                        "pg_status": pg_entry.get('status', 'Unknown'),
+                        "oms_status": oms_entry.get('status', 'Unknown'),
+                        "details": "Verified" if status == "MATCHED" else f"Alert: {status} detected!"
                     }
                     
                     # Send result to React Dashboard via WebSocket
                     try:
+                        print(f"📤 Sending update to UI: {txn_id}")
                         await websocket.send_json(result)
-                    except Exception:
-                        pass # WebSocket might be closed, but we still want to match
+                    except Exception as e:
+                        print(f"⚠️ WebSocket Send Error: {e}")
+                        # Don't pass, let us see it in the terminal
                         
                     # Detailed Console Output
                     icon = "✅" if status == "MATCHED" else "⚠️"

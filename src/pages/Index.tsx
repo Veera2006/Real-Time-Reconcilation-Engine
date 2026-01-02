@@ -2,16 +2,16 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { Header } from '@/components/dashboard/Header';
 import { SummaryCards } from '@/components/dashboard/SummaryCards';
-import { HeatmapGrid } from '@/components/dashboard/HeatmapGrid';
+import { MismatchChart } from '@/components/dashboard/MismatchChart';
 import { TransactionTable } from '@/components/dashboard/TransactionTable';
 import { MismatchPanel } from '@/components/dashboard/MismatchPanel';
-import { generateMockTransactions, generateHeatmapData, Transaction, TransactionStatus } from '@/data/mockTransactions';
+import { generateMockTransactions, Transaction, TransactionStatus } from '@/data/mockTransactions';
 import { toast } from 'sonner';
 
 const Index = () => {
   // Start with empty transaction list
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [heatmapData] = useState(() => generateHeatmapData());
+  // heatmapData state removed - derived from transactions now
   const [statusFilter, setStatusFilter] = useState<TransactionStatus | null>(null);
   const [isLiveSimulating, setIsLiveSimulating] = useState(false);
 
@@ -34,23 +34,24 @@ const Index = () => {
         const newTxn: Transaction = {
           id: data.txn_id,
           upiRefId: data.txn_id,
-          orderId: `ORD_${data.txn_id.split('_')[1] || Date.now()}`, // Generate ORD from TXN if possible
+          orderId: `ORD_${data.txn_id.split('_')[1] || Date.now()}`, 
           merchant: 'Nykaa',
           bank: 'HDFC Bank',
           paymentGateway: 'Razorpay',
           pgAmount: data.pg_amount,
           omsAmount: data.oms_amount,
-          cbsAmount: null, // Not provided by backend yet
-          pgStatus: 'Success',
-          omsStatus: 'Completed',
+          cbsAmount: null,
+          pgStatus: data.pg_status || 'Success',
+          omsStatus: data.oms_status || 'Completed',
           cbsStatus: null,
           status: data.status === 'MATCHED' ? 'matched' : 'mismatch',
           matchConfidence: data.status === 'MATCHED' ? 100 : 0,
           timestamp: new Date(),
           paymentMethod: 'UPI',
-          // Add error details if mismatch
-          errorType: data.status !== 'MATCHED' ? 'amount_mismatch' : undefined,
-          errorDescription: data.status !== 'MATCHED' ? data.details : undefined,
+          // Add error details
+          errorType: data.status === 'AMOUNT_MISMATCH' ? 'amount_mismatch' : 
+                     data.status === 'STATUS_MISMATCH' ? 'status_inconsistency' : undefined,
+          errorDescription: data.details,
         };
 
         setTransactions(prev => [newTxn, ...prev].slice(0, 100)); // Keep last 100
@@ -110,11 +111,7 @@ const Index = () => {
           {/* Heatmap and Quick Stats Row */}
           <div className="grid grid-cols-1 gap-6">
             <div className="w-full">
-              <HeatmapGrid 
-                data={heatmapData} 
-                onCellClick={setStatusFilter} 
-                activeFilter={statusFilter}
-              />
+              <MismatchChart transactions={transactions} />
             </div>
           </div>
 
