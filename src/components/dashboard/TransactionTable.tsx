@@ -85,7 +85,7 @@ export function TransactionTable({ transactions, filter }: TransactionTableProps
                 )}
               >
                 {/* Date & Time */}
-                <td className="px-4 py-3 font-medium">
+                <td className="px-4 py-3 text-sm text-muted-foreground">
                    {format(txn.timestamp, 'MMM dd, HH:mm:ss')}
                 </td>
                 
