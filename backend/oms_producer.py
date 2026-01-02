@@ -20,21 +20,38 @@ def generate_oms_event():
     txn_id = f"TXN_{current_id}"
     current_id += 1
     
-    # Must use same amount logic as PG primarily
-    # But introduce a 10% chance of anomaly
-    base_amount = random.choice([499.00, 1200.50, 2500.00, 89.99])
+    # 1. Base Data: Deterministic (Must match PG)
+    # Use same seed as PG so we pick the SAME amount by default
+    rd_base = random.Random(txn_id)
+    base_amount = rd_base.choice([499.00, 1200.50, 2500.00, 89.99, 150.00, 999.00])
     
-    if random.random() < 0.10: # 10% chance of mismatch
-        final_amount = base_amount + 10.00 # Create discrepancy
-        print(f"⚠️ Generating ANOMALY for {txn_id}: PG={base_amount}, OMS={final_amount}")
-    else:
-        final_amount = base_amount
+    # 2. Anomaly Injection: Dynamic (Changes every run / random)
+    # Use standard random.random() which is time-seeded
+    final_amount = base_amount
+    status = "ORDER_PLACED"
+    
+    if random.random() < 0.20: # 20% chance of anomaly
+        anomaly_type = random.choice(['amount_mismatch', 'status_failure'])
+        
+        if anomaly_type == 'amount_mismatch':
+            # Add random variation like +/- 1% to 10%
+            variation = random.uniform(1.0, 50.0)
+            if random.choice([True, False]):
+                final_amount += variation
+            else:
+                final_amount -= variation
+            final_amount = round(final_amount, 2)
+            print(f"⚠️  Anomaly (Amount): {txn_id} | PG={base_amount} -> OMS={final_amount}")
+            
+        elif anomaly_type == 'status_failure':
+            status = "PAYMENT_FAILED"
+            print(f"⚠️  Anomaly (Status): {txn_id} | PG=CAPTURED -> OMS={status}")
 
     return {
         "order_id": f"ORD_{random.randint(100, 999)}",
         "transaction_id": txn_id,
         "amount": final_amount,
-        "status": "ORDER_PLACED",
+        "status": status,
         "timestamp": time.time()
     }
 

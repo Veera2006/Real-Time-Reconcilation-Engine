@@ -21,8 +21,11 @@ def generate_pg_event():
     txn_id = f"TXN_{current_id}"
     current_id += 1
     
-    # Standardize amounts list for consistent matching
-    amount = random.choice([499.00, 1200.50, 2500.00, 89.99])
+    # Use seeded random to ensure PG and OMS generate SAME base amount for this ID
+    # This prevents random mismatches, ensuring baseline is 100% match
+    rd = random.Random(txn_id)
+    
+    amount = rd.choice([499.00, 1200.50, 2500.00, 89.99, 150.00, 999.00])
     
     return {
         "transaction_id": txn_id,
