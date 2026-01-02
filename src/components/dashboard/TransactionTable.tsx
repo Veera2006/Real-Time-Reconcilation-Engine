@@ -34,7 +34,7 @@ export function TransactionTable({ transactions, filter }: TransactionTableProps
     <div className="rounded-lg border border-border/50 bg-card overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border/50 bg-secondary/30 px-4 py-3">
-        <h3 className="text-sm font-semibold text-foreground">Three-Way Reconciliation Ledger</h3>
+        <h3 className="text-sm font-semibold text-foreground">Two-Way Reconciliation Ledger</h3>
         <div className="flex items-center gap-4">
           <Badge variant="outline" className="text-xs">
             {filteredTransactions.length} transactions
