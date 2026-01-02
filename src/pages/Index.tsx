@@ -107,42 +107,14 @@ const Index = () => {
           <SummaryCards {...summaryStats} />
 
           {/* Heatmap and Quick Stats Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
+          {/* Heatmap and Quick Stats Row */}
+          <div className="grid grid-cols-1 gap-6">
+            <div className="w-full">
               <HeatmapGrid 
                 data={heatmapData} 
                 onCellClick={setStatusFilter} 
                 activeFilter={statusFilter}
               />
-            </div>
-            <div className="rounded-lg border border-border/50 bg-card p-4">
-              <h3 className="text-sm font-semibold text-foreground mb-4">Quick Stats</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Avg. Settlement Time</span>
-                  <span className="text-sm font-medium text-foreground">2.3 hrs</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Match Rate (24h)</span>
-                  <span className="text-sm font-medium text-success">98.2%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">GST Discrepancies</span>
-                  <span className="text-sm font-medium text-warning">3</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Pending Escalations</span>
-                  <span className="text-sm font-medium text-destructive">2</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Top PG Today</span>
-                  <span className="text-sm font-medium text-foreground">Razorpay</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Top Bank Today</span>
-                  <span className="text-sm font-medium text-foreground">HDFC Bank</span>
-                </div>
-              </div>
             </div>
           </div>
 
