@@ -27,6 +27,7 @@ export function SummaryCards({ totalSettled, activeMismatches }: Pick<SummaryCar
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Settled</p>
             <p className="mt-2 text-2xl font-bold text-foreground">{formatCurrency(totalSettled)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">Live reconciliation</p>
           </div>
           <div className="rounded-lg bg-success/10 p-2.5">
             <IndianRupee className="h-5 w-5 text-success" />
@@ -40,7 +41,8 @@ export function SummaryCards({ totalSettled, activeMismatches }: Pick<SummaryCar
         <div className="flex items-start justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Active Mismatches</p>
-            <p className="mt-2 text-2xl font-bold text-foreground">{formatCurrency(totalSettled)}</p>
+            <p className="mt-2 text-2xl font-bold text-foreground">{activeMismatches}</p>
+            <p className="mt-1 text-xs text-destructive">Requires attention</p>
           </div>
           <div className="rounded-lg bg-destructive/10 p-2.5">
             <AlertTriangle className="h-5 w-5 text-destructive" />
