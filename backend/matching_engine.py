@@ -9,7 +9,7 @@ app = FastAPI()
 # Kafka Config
 conf = {
     'bootstrap.servers': "localhost:9094",
-    'group.id': "recon-group",
+    'group.id': "recon-group-v2", # Changed group to reset offsets/ensure consumption
     'auto.offset.reset': 'earliest'
 }
 consumer = Consumer(conf)
@@ -39,16 +39,15 @@ async def cleanup_buffers():
         print(f"🧹 Cleanup: Dropped orphan OMS transaction {k}")
 
 async def reconcile_logic(websocket: WebSocket):
+    print("🏁 Matching Engine Started. Waiting for events...")
     try:
         last_cleanup = time.time()
         
         while True:
             # NON-BLOCKING POLL
-            # poll(0) returns immediately if no message, preventing event loop block
             msg = consumer.poll(0.0) 
             
             if msg is None:
-                # Yield control to the event loop to allow WebSocket pings and other tasks
                 await asyncio.sleep(0.01) 
                 
                 # Check if we need to run cleanup (every 10 seconds)
@@ -58,7 +57,7 @@ async def reconcile_logic(websocket: WebSocket):
                 continue
             
             if msg.error():
-                print(f"Consumer error: {msg.error()}")
+                print(f"❌ Consumer error: {msg.error()}")
                 continue
 
             # Parse incoming data
@@ -68,6 +67,9 @@ async def reconcile_logic(websocket: WebSocket):
                 topic = msg.topic()
                 
                 current_time = time.time()
+                
+                # Log receipt
+                print(f"📥 Received {topic}: {txn_id}")
 
                 if topic == 'pg_data':
                     pg_buffer[txn_id] = {'data': data, 'timestamp': current_time}
@@ -93,8 +95,14 @@ async def reconcile_logic(websocket: WebSocket):
                     }
                     
                     # Send result to React Dashboard via WebSocket
-                    await websocket.send_json(result)
-                    print(f"🔍 Reconciled: {txn_id} -> {status}")
+                    try:
+                        await websocket.send_json(result)
+                    except Exception:
+                        pass # WebSocket might be closed, but we still want to match
+                        
+                    # Detailed Console Output
+                    icon = "✅" if status == "MATCHED" else "⚠️"
+                    print(f"{icon} MATCHED: {txn_id} | PG: {pg_entry['amount']} | OMS: {oms_entry['amount']} | Status: {status}")
             except Exception as e:
                 print(f"Error processing message: {e}")
 
