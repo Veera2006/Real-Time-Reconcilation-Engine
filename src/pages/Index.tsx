@@ -11,9 +11,7 @@ import { toast } from 'sonner';
 const Index = () => {
   const [transactions, setTransactions] = useState<Transaction[]>(() => generateMockTransactions());
   const [heatmapData] = useState(() => generateHeatmapData());
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [statusFilter, setStatusFilter] = useState<TransactionStatus | null>(null);
-  const [showGST, setShowGST] = useState(false);
   const [isLiveSimulating, setIsLiveSimulating] = useState(false);
 
   // Calculate summary stats
@@ -150,27 +148,12 @@ const Index = () => {
           {/* Transaction Table */}
           <TransactionTable 
             transactions={transactions}
-            onRowClick={setSelectedTransaction}
             filter={statusFilter}
-            showGST={showGST}
-            onGSTToggle={setShowGST}
           />
         </main>
       </div>
 
-      {/* Mismatch Detail Panel */}
-      {selectedTransaction && (
-        <>
-          <div 
-            className="fixed inset-0 bg-background/50 backdrop-blur-sm z-40"
-            onClick={() => setSelectedTransaction(null)}
-          />
-          <MismatchPanel 
-            transaction={selectedTransaction} 
-            onClose={() => setSelectedTransaction(null)} 
-          />
-        </>
-      )}
+
     </div>
   );
 };
