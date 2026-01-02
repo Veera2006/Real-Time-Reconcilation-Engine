@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { Header } from '@/components/dashboard/Header';
 import { SummaryCards } from '@/components/dashboard/SummaryCards';
@@ -9,10 +9,66 @@ import { generateMockTransactions, generateHeatmapData, Transaction, Transaction
 import { toast } from 'sonner';
 
 const Index = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>(() => generateMockTransactions());
+  // Start with empty transaction list
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [heatmapData] = useState(() => generateHeatmapData());
   const [statusFilter, setStatusFilter] = useState<TransactionStatus | null>(null);
   const [isLiveSimulating, setIsLiveSimulating] = useState(false);
+
+  // WebSocket Connection
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:8000/ws/recon');
+
+    ws.onopen = () => {
+      console.log('✅ Connected to Reconciliation Engine');
+      toast.success('Connected to Reconciliation Engine');
+      setIsLiveSimulating(true); // Indicate live status
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('📥 Received:', data);
+
+        // Map Backend JSON to Frontend Transaction Interface
+        const newTxn: Transaction = {
+          id: data.txn_id,
+          upiRefId: data.txn_id,
+          orderId: `ORD_${data.txn_id.split('_')[1] || Date.now()}`, // Generate ORD from TXN if possible
+          merchant: 'Nykaa',
+          bank: 'HDFC Bank',
+          paymentGateway: 'Razorpay',
+          pgAmount: data.pg_amount,
+          omsAmount: data.oms_amount,
+          cbsAmount: null, // Not provided by backend yet
+          pgStatus: 'Success',
+          omsStatus: 'Completed',
+          cbsStatus: null,
+          status: data.status === 'MATCHED' ? 'matched' : 'mismatch',
+          matchConfidence: data.status === 'MATCHED' ? 100 : 0,
+          timestamp: new Date(),
+          paymentMethod: 'UPI',
+          // Add error details if mismatch
+          errorType: data.status !== 'MATCHED' ? 'amount_mismatch' : undefined,
+          errorDescription: data.status !== 'MATCHED' ? data.details : undefined,
+        };
+
+        setTransactions(prev => [newTxn, ...prev].slice(0, 100)); // Keep last 100
+      } catch (err) {
+        console.error('Error parsing WS message:', err);
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('❌ Disconnected from Reconciliation Engine');
+      toast.error('Disconnected from Reconciliation Engine');
+      setIsLiveSimulating(false);
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, []);
 
   // Calculate summary stats
   const summaryStats = useMemo(() => {
@@ -25,69 +81,14 @@ const Index = () => {
     const upiCount = transactions.filter(t => t.paymentMethod === 'UPI').length;
     const cardCount = transactions.filter(t => t.paymentMethod === 'Card').length;
     
-    const autoResolved = 12; // Mock number
+    const autoResolved = 0; 
     
     return { totalSettled, activeMismatches, upiCount, cardCount, autoResolved };
   }, [transactions]);
 
   const handleSimulateLive = useCallback(() => {
-    setIsLiveSimulating(true);
-    toast.info('Simulating live transaction ingestion...');
-
-    // Simulate 3 new transactions coming in
-    const newTransactions: Transaction[] = [
-      {
-        id: `TXN${Date.now()}001`,
-        upiRefId: `pay_LIVE${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-        orderId: `ORD${Date.now()}`,
-        merchant: 'Nykaa',
-        bank: 'ICICI Bank',
-        paymentGateway: 'Razorpay',
-        pgAmount: 450,
-        omsAmount: 450,
-        cbsAmount: 450,
-        pgStatus: 'Success',
-        omsStatus: 'Completed',
-        cbsStatus: 'Settled',
-        status: 'matched' as TransactionStatus,
-        matchConfidence: 100,
-        timestamp: new Date(),
-        paymentMethod: 'UPI',
-        gstAmount: 81,
-      },
-      {
-        id: `TXN${Date.now()}002`,
-        upiRefId: `pay_LIVE${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-        orderId: `ORD${Date.now() + 1}`,
-        merchant: 'Nykaa',
-        bank: 'HDFC Bank',
-        paymentGateway: 'PayU',
-        pgAmount: 890,
-        omsAmount: 890,
-        cbsAmount: null,
-        pgStatus: 'Success',
-        omsStatus: 'Completed',
-        cbsStatus: null,
-        status: 'pending' as TransactionStatus,
-        matchConfidence: 50,
-        timestamp: new Date(),
-        paymentMethod: 'Card',
-        gstAmount: 160,
-      },
-    ];
-
-    let index = 0;
-    const interval = setInterval(() => {
-      if (index < newTransactions.length) {
-        setTransactions(prev => [newTransactions[index], ...prev]);
-        toast.success(`New transaction ingested: ${newTransactions[index].upiRefId}`);
-        index++;
-      } else {
-        clearInterval(interval);
-        setIsLiveSimulating(false);
-        toast.success('Live simulation completed');
-      }
-    }, 1500);
+    // No-op for now, as rely on real WS
+    toast.info('Live connection is managed automatically via WebSocket');
   }, []);
 
   return (
