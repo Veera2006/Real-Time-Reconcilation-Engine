@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 const Index = () => {
   // Start with empty transaction list
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  // heatmapData state removed - derived from transactions now
+  const [currentView, setCurrentView] = useState('dashboard');
   const [statusFilter, setStatusFilter] = useState<TransactionStatus | null>(null);
   const [isLiveSimulating, setIsLiveSimulating] = useState(false);
 
@@ -95,7 +95,7 @@ const Index = () => {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar activeView={currentView} onNavigate={setCurrentView} />
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
@@ -104,22 +104,46 @@ const Index = () => {
 
         {/* Dashboard Content */}
         <main className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Summary Cards */}
-          <SummaryCards {...summaryStats} />
+          {currentView === 'dashboard' && (
+            <>
+              {/* Summary Cards */}
+              <SummaryCards {...summaryStats} />
 
-          {/* Heatmap and Quick Stats Row */}
-          {/* Heatmap and Quick Stats Row */}
-          <div className="grid grid-cols-1 gap-6">
-            <div className="w-full">
-              <MismatchChart transactions={transactions} />
+              {/* Heatmap and Quick Stats Row */}
+              <div className="grid grid-cols-1 gap-6">
+                <div className="w-full">
+                  <MismatchChart transactions={transactions} />
+                </div>
+              </div>
+
+              {/* Transaction Table */}
+              <TransactionTable 
+                transactions={transactions}
+                filter={statusFilter}
+              />
+            </>
+          )}
+
+          {currentView === 'anomalies' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold tracking-tight">Anomalies Detected</h2>
+                  <p className="text-muted-foreground">List of all transactions flagged for review.</p>
+                </div>
+              </div>
+              <TransactionTable 
+                transactions={transactions}
+                filter="mismatch"
+              />
             </div>
-          </div>
-
-          {/* Transaction Table */}
-          <TransactionTable 
-            transactions={transactions}
-            filter={statusFilter}
-          />
+          )}
+          
+          {currentView !== 'dashboard' && currentView !== 'anomalies' && (
+             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+               <p>Page not implemented: {currentView}</p>
+             </div>
+          )}
         </main>
       </div>
 
