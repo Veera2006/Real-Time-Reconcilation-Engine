@@ -19,13 +19,14 @@ interface SidebarProps {
   className?: string;
   activeView: string;
   onNavigate: (view: string) => void;
+  anomaliesCount: number;
 }
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard' },
   { icon: ArrowLeftRight, label: 'Reconciliation' },
-  { icon: AlertTriangle, label: 'Anomalies', badge: 5 },
-  { icon: Clock, label: 'Pending', badge: 2 },
+  { icon: AlertTriangle, label: 'Anomalies' },
+  { icon: Clock, label: 'Pending' },
   { icon: FileText, label: 'Reports' },
 ];
 
@@ -34,7 +35,7 @@ const bottomItems = [
   { icon: HelpCircle, label: 'Help' },
 ];
 
-export function Sidebar({ className, activeView, onNavigate }: SidebarProps) {
+export function Sidebar({ className, activeView, onNavigate, anomaliesCount }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -67,6 +68,17 @@ export function Sidebar({ className, activeView, onNavigate }: SidebarProps) {
       <nav className="flex-1 p-2 space-y-1">
         {menuItems.map((item) => {
           const isActive = activeView === item.label.toLowerCase();
+          
+          // Determine badge count based on label
+          let badgeCount = undefined;
+          if (item.label === 'Anomalies') badgeCount = anomaliesCount;
+          // Pending removed as per request "remove the 5 and 2 notification numbers" 
+          // (User said "remove the 5 and 2... from anomalies and pending pages", 
+          // but then said "transaction count on the anomalies page". 
+          // Getting clarification: "remove the 5 and 2... then the transaction count on the anomalies page". 
+          // I will show the live count for Anomalies (as requested in "transaction count on the anomalies page") 
+          // but remove Pending count entirely.)
+
           return (
             <Tooltip key={item.label} delayDuration={0}>
               <TooltipTrigger asChild>
@@ -84,16 +96,16 @@ export function Sidebar({ className, activeView, onNavigate }: SidebarProps) {
                   {!collapsed && (
                     <>
                       <span className="flex-1 text-left">{item.label}</span>
-                      {item.badge && (
+                      {badgeCount !== undefined && badgeCount > 0 && (
                         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
-                          {item.badge}
+                          {badgeCount}
                         </span>
                       )}
                     </>
                   )}
-                  {collapsed && item.badge && (
+                  {collapsed && badgeCount !== undefined && badgeCount > 0 && (
                     <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[8px] font-bold text-destructive-foreground">
-                      {item.badge}
+                      {badgeCount}
                     </span>
                   )}
                 </button>

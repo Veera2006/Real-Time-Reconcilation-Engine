@@ -7,9 +7,12 @@ interface MismatchChartProps {
 }
 
 export function MismatchChart({ transactions }: MismatchChartProps) {
-  // Filter for mismatches and take the most recent ones
-  const mismatchData = transactions
-    .filter(t => t.status === 'mismatch' || t.errorType === 'status_inconsistency')
+  // Filter for mismatches
+  const allMismatches = transactions.filter(t => t.status === 'mismatch' || t.errorType === 'status_inconsistency');
+  const totalMismatches = allMismatches.length;
+
+  // Slice for display
+  const mismatchData = allMismatches
     .map(t => ({
       id: t.id,
       amount: t.pgAmount,
@@ -19,7 +22,7 @@ export function MismatchChart({ transactions }: MismatchChartProps) {
       isStatusMismatch: t.errorType === 'status_inconsistency',
       gateway: t.paymentGateway
     }))
-    .slice(0, 15); // Show last 15 mismatches
+    .slice(0, 15); // Show last 15 mismatches in chart
 
   if (mismatchData.length === 0) {
     return (
@@ -42,7 +45,7 @@ export function MismatchChart({ transactions }: MismatchChartProps) {
         </div>
         <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
-            <span className="text-xs font-medium text-destructive">{mismatchData.length} Active Issues</span>
+            <span className="text-xs font-medium text-destructive">{totalMismatches} Active Issues</span>
         </div>
       </div>
       <div className="flex-1 w-full min-h-0">

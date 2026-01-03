@@ -37,15 +37,6 @@ export function Header({ onSimulateLive, isLiveSimulating }: HeaderProps) {
 
       {/* Right Section */}
       <div className="flex items-center gap-3">
-        {/* Search */}
-        <div className="relative hidden md:block">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input 
-            placeholder="Search transactions..." 
-            className="w-64 pl-9 bg-secondary/50 border-border focus:bg-secondary"
-          />
-        </div>
-
         {/* Theme Toggle */}
         <ThemeToggle />
 
@@ -69,43 +60,6 @@ export function Header({ onSimulateLive, isLiveSimulating }: HeaderProps) {
             </>
           )}
         </Button>
-
-        {/* Notifications */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5 text-muted-foreground" />
-              <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
-                3
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80 bg-popover border-border">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-              <div className="flex items-center gap-2">
-                <Badge variant="destructive" className="text-[10px]">Mismatch</Badge>
-                <span className="text-xs text-muted-foreground">2 min ago</span>
-              </div>
-              <p className="text-sm">Amount mismatch detected: ₹1,200 vs ₹1,150</p>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-[10px] bg-warning/20 text-warning">Pending</Badge>
-                <span className="text-xs text-muted-foreground">15 min ago</span>
-              </div>
-              <p className="text-sm">CBS settlement pending for 3 transactions</p>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-[10px] bg-success/20 text-success">Resolved</Badge>
-                <span className="text-xs text-muted-foreground">1 hour ago</span>
-              </div>
-              <p className="text-sm">Auto-resolved 12 GST adjustments</p>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
 
         {/* User Menu */}
         <DropdownMenu>

@@ -54,7 +54,7 @@ const Index = () => {
           errorDescription: data.details,
         };
 
-        setTransactions(prev => [newTxn, ...prev].slice(0, 100)); // Keep last 100
+        setTransactions(prev => [newTxn, ...prev].slice(0, 5000)); // Keep last 5000 for live feel
       } catch (err) {
         console.error('Error parsing WS message:', err);
       }
@@ -77,6 +77,7 @@ const Index = () => {
       .filter(t => t.status === 'matched')
       .reduce((sum, t) => sum + t.pgAmount, 0);
     
+    // This variable acts as the single source of truth for "Anomalies Count"
     const activeMismatches = transactions.filter(t => t.status === 'mismatch').length;
     
     const upiCount = transactions.filter(t => t.paymentMethod === 'UPI').length;
@@ -94,8 +95,12 @@ const Index = () => {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
-      {/* Sidebar */}
-      <Sidebar activeView={currentView} onNavigate={setCurrentView} />
+      {/* Sidebar - Passing live anomalies count */}
+      <Sidebar 
+        activeView={currentView} 
+        onNavigate={setCurrentView} 
+        anomaliesCount={summaryStats.activeMismatches}
+      />
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
