@@ -3,10 +3,6 @@ import {
   LayoutDashboard, 
   ArrowLeftRight, 
   AlertTriangle, 
-  Clock, 
-  FileText, 
-  Settings, 
-  HelpCircle,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
@@ -26,14 +22,9 @@ const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard' },
   { icon: ArrowLeftRight, label: 'Reconciled' },
   { icon: AlertTriangle, label: 'Anomalies' },
-  { icon: Clock, label: 'Pending' },
-  { icon: FileText, label: 'Reports' },
 ];
 
-const bottomItems = [
-  { icon: Settings, label: 'Settings' },
-  { icon: HelpCircle, label: 'Help' },
-];
+
 
 export function Sidebar({ className, activeView, onNavigate, anomaliesCount }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
@@ -120,29 +111,8 @@ export function Sidebar({ className, activeView, onNavigate, anomaliesCount }: S
         })}
       </nav>
 
-      {/* Bottom Items */}
+      {/* Bottom Items - Removed */}
       <div className="p-2 space-y-1 border-t border-sidebar-border">
-        {bottomItems.map((item) => (
-          <Tooltip key={item.label} delayDuration={0}>
-            <TooltipTrigger asChild>
-              <button
-                className={cn(
-                  'flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                  'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground',
-                  collapsed && 'justify-center px-2'
-                )}
-              >
-                <item.icon className="h-5 w-5 flex-shrink-0" />
-                {!collapsed && <span>{item.label}</span>}
-              </button>
-            </TooltipTrigger>
-            {collapsed && (
-              <TooltipContent side="right" className="bg-popover border-border">
-                <p>{item.label}</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        ))}
         
         <Separator className="my-2 bg-sidebar-border" />
         
