@@ -1,73 +1,98 @@
-# Welcome to your Lovable project
+# 🚀 ReconFlow
 
-## Project info
+**ReconFlow** is a high-performance, real-time financial reconciliation dashboard designed to detect anomalies between Payment Gateway (PG) logs and Order Management System (OMS) records instantly.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Built with a **React** frontend and a **Python/Kafka** backend, it simulates a live fintech environment processing thousands of transactions, flagging mismatches in milliseconds.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 🌟 Key Features
 
-**Use Lovable**
+*   **⚡ Real-Time Reconciliation**: Processes transactions live via WebSockets without page reloads.
+*   **🔍 Anomaly Detection**:
+    *   **Amount Mismatches**: Flags discrepancies (e.g., PG: ₹100 vs OMS: ₹99).
+    *   **Status Inconsistencies**: Detects critical failures (e.g., PG: Success vs OMS: Failed).
+*   **📊 Live Visualization**:
+    *   Dynamic "Active Issues" counters.
+    *   Rolling transaction buffer (5,000+ records).
+    *   Interactive Mismatch Severity Charts.
+*   **🕵️‍♂️ Advanced Filtering**:
+    *   Drill down into **Reconciled** data by **Date Range**, **Time Range**, and **Amount**.
+*   **🛠️ Simulation Engine**: Built-in Python producers that generate realistic traffic and inject controlled random anomalies for testing.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🛠️ Tech Stack
 
-**Use your preferred IDE**
+### Frontend
+*   **Framework**: [React 18](https://react.dev/) + [Vite](https://vitejs.dev/)
+*   **Language**: TypeScript
+*   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+*   **UI Components**: [Shadcn UI](https://ui.shadcn.com/) + Lucide Icons
+*   **State Management**: React Hooks (Optimized for high-frequency updates)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Backend
+*   **Engine**: Python 3.13 + [FastAPI](https://fastapi.tiangolo.com/)
+*   **Messaging**: [Apache Kafka](https://kafka.apache.org/) (Dockerized)
+*   **Protocol**: WebSockets (Native API)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## 🏗️ Architecture
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1.  **Ingestion**:
+    *   `pg_producer.py`: Simulates Payment Gateway events, generating "valid" payment logs.
+    *   `oms_producer.py`: Simulates Order Management System events (with randomly injected anomalies).
+    *   Both producers push JSON messages to **Kafka** topics (`pg_data`, `oms_data`).
+2.  **Processing**:
+    *   `matching_engine.py`: A high-throughput consumer that polls both topics.
+    *   It buffers events, matches them by `transaction_id`, and runs logic to determine status: `MATCHED`, `AMOUNT_MISMATCH`, or `STATUS_MISMATCH`.
+3.  **Delivery**:
+    *   The engine pushes the processed result to the **Frontend** via a low-latency **WebSocket** connection.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 🚀 Getting Started
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### Prerequisites
+*   Node.js (v18+) & npm
+*   Python 3.13+
+*   Docker & Docker Compose
+
+### 1. Start Infrastructure (Kafka)
+```bash
+cd backend
+docker-compose up -d
 ```
 
-**Edit a file directly in GitHub**
+### 2. Start the Backend Engine
+Open a terminal in the `backend` directory:
+```bash
+pip install -r requirements.txt
+uvicorn matching_engine:app --reload
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### 3. Start Data Producers
+Open two separate terminals to simulate traffic:
+```bash
+# Terminal A (Payment Gateway)
+cd backend
+python pg_producer.py
 
-**Use GitHub Codespaces**
+# Terminal B (Order Management System)
+cd backend
+python oms_producer.py
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### 4. Start the Frontend
+Open a terminal in the project root:
+```bash
+npm install
+npm run dev
+```
+Visit `http://localhost:8080` to see the dashboard live!
 
-## What technologies are used for this project?
+---
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 📄 License
+This project is licensed under the MIT License.
