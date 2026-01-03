@@ -24,7 +24,7 @@ export function Header({ onSimulateLive, isLiveSimulating }: HeaderProps) {
       <div className="flex items-center gap-4">
         <div>
           <h1 className="text-lg font-semibold text-foreground">Transaction Reconciliation</h1>
-          <p className="text-xs text-muted-foreground">Real-time monitoring • Last sync 2 min ago</p>
+          <p className="text-xs text-muted-foreground">Real-time monitoring</p>
         </div>
         <div className="flex items-center gap-2 rounded-full bg-success/10 px-3 py-1">
           <span className="relative flex h-2 w-2">

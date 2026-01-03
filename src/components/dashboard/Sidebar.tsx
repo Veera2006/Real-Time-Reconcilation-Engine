@@ -24,7 +24,7 @@ interface SidebarProps {
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard' },
-  { icon: ArrowLeftRight, label: 'Reconciliation' },
+  { icon: ArrowLeftRight, label: 'Reconciled' },
   { icon: AlertTriangle, label: 'Anomalies' },
   { icon: Clock, label: 'Pending' },
   { icon: FileText, label: 'Reports' },
@@ -52,7 +52,7 @@ export function Sidebar({ className, activeView, onNavigate, anomaliesCount }: S
               <ArrowLeftRight className="h-4 w-4 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-sidebar-foreground">ReconEngine</h1>
+              <h1 className="text-sm font-bold text-sidebar-foreground">ReconFlow</h1>
               <p className="text-[10px] text-sidebar-foreground/60">v2.4.1</p>
             </div>
           </div>
