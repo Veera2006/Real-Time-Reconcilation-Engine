@@ -59,6 +59,22 @@ Built with a **React** frontend and a **Python/Kafka** backend, it simulates a l
 *   Python 3.13+
 *   Docker & Docker Compose
 
+### Run Everything With Docker (Recommended)
+From the project root:
+```bash
+docker compose up --build
+```
+
+Services:
+*   Frontend: `http://localhost:8080`
+*   Backend WebSocket: `ws://localhost:8001/ws/recon`
+*   Kafka (host mapped): `localhost:9094`
+
+To stop everything:
+```bash
+docker compose down
+```
+
 ### 1. Start Infrastructure (Kafka)
 ```bash
 cd backend

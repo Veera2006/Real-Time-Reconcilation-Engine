@@ -1,9 +1,10 @@
 import json
 import time
 import random
+import os
 from confluent_kafka import Producer
 
-conf = {'bootstrap.servers': "localhost:9094"}
+conf = {'bootstrap.servers': os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9094')}
 producer = Producer(conf)
 
 def delivery_report(err, msg):
@@ -62,6 +63,7 @@ try:
         producer.produce('oms_data', key=event['transaction_id'], 
                          value=json.dumps(event), callback=delivery_report)
         producer.poll(0)
-        time.sleep(1.2) # Slightly different speed allows "drift" but IDs will match
+        # Keep cadence aligned with PG producer so matching IDs stay within buffer TTL.
+        time.sleep(1)
 except KeyboardInterrupt:
     producer.flush()

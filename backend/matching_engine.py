@@ -1,6 +1,7 @@
 import json
 import asyncio
 import time
+import os
 from fastapi import FastAPI, WebSocket
 from confluent_kafka import Consumer
 
@@ -8,7 +9,7 @@ app = FastAPI()
 
 # Kafka Config
 conf = {
-    'bootstrap.servers': "localhost:9094",
+    'bootstrap.servers': os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9094'),
     'group.id': "recon-group-force-reset-v1", # Changed group to force read from start
     'auto.offset.reset': 'earliest'
 }

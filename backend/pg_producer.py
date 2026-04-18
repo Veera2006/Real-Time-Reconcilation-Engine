@@ -1,10 +1,11 @@
 import json
 import time
 import random
+import os
 from confluent_kafka import Producer
 
 # Kafka Configuration
-conf = {'bootstrap.servers': "localhost:9094"}
+conf = {'bootstrap.servers': os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9094')}
 producer = Producer(conf)
 
 def delivery_report(err, msg):
